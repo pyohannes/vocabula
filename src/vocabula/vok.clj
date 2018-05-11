@@ -5,7 +5,16 @@
   )
 
 
-(declare read-vok write-vok)
+(declare comment-or-empty-line?
+         read-vok write-vok)
+
+
+(deftest comment-or-empty-line?-test
+  (is (comment-or-empty-line? ""))
+  (is (comment-or-empty-line? "# comment"))
+  (is (not (comment-or-empty-line? "a <> b")))
+  (is (not (comment-or-empty-line? "a <> b # comment")))
+  )
 
 
 (defn- comment-or-empty-line?
@@ -20,6 +29,11 @@
         filename (.getAbsolutePath tempfile)]
     (.deleteOnExit tempfile)
     (spit filename "puella,ae <> girl\n")
+    (is (= (read-vok filename)
+           [{:rate  0
+             :left  [{:text "puella,ae"}]
+             :right [{:text "girl"}]}]))
+    (spit filename "\n\npuella,ae <> girl\n\n")
     (is (= (read-vok filename)
            [{:rate  0
              :left  [{:text "puella,ae"}]
