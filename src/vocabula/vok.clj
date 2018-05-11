@@ -1,6 +1,6 @@
 (ns vocabula.vok
   (:require [clojure.test :refer :all]
-            [clojure.string :refer :all]
+            [clojure.string :refer [trim starts-with?]]
             [vocabula.data :refer :all])
   )
 

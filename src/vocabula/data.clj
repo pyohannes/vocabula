@@ -1,6 +1,6 @@
 (ns vocabula.data
   (:require [clojure.test :refer :all]
-            [clojure.string :refer :all])
+            [clojure.string :refer [trim join split]])
   )
 
 (declare word? word->string string->word
@@ -120,11 +120,11 @@
 (defn vocable->string
   "Returns a string representation of the vocable v."
   [v]
-  (str (clojure.string/join " | " (map word->string (:left v)))
+  (str (join " | " (map word->string (:left v)))
        (if (= 0 (:rate v))
            " <> "
            (str " <" (:rate v) "> "))
-       (clojure.string/join " | " (map word->string (:right v))))
+       (join " | " (map word->string (:right v))))
   )
 
 
