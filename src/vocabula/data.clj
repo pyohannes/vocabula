@@ -4,7 +4,8 @@
   )
 
 (declare word? word->string string->word
-         vocable? vocable->string string->vocable)
+         vocable? vocable->string string->vocable
+         worst update-vocables)
 
 
 (deftest word?-test
@@ -151,3 +152,65 @@
                 0
                 (Integer. rate))})
   )
+
+
+(deftest worst-test
+  (let [v1 (vocable->string "puella,ae <4> girl")
+        v2 (vocable->string "magnus,a,um <-3> great")
+        v3 (vocable->string "hodie <0> today")
+        v4 (vocable->string "puer,i <-2> boy")]
+    (let [w (worst 1 [v1 v2 v3 v4])]
+      (is (.contains w v2)))
+    (let [w (worst 2 [v1 v2 v3 v4])]
+      (is (.contains w v2))
+      (is (.contains w v4)))
+    (let [w (worst 3 [v1 v2 v3 v4])]
+      (is (.contains w v2))
+      (is (.contains w v3))
+      (is (.contains w v4)))
+    (let [w (worst 4 [v1 v2 v3 v4])]
+      (is (.contains w v1))
+      (is (.contains w v2))
+      (is (.contains w v3))
+      (is (.contains w v4)))
+  ))
+
+
+(defn worst
+  "Return the n vocables with the worst rate."
+  [n vocables]
+  (take n (sort-by :rate vocables)))
+
+
+(deftest merge-vocables-test
+  (let [v1 (string->vocable "puella,ae <4> girl")
+        v2 (string->vocable "magnus,a,um <-3> great")
+        v3 (string->vocable "hodie <0> today")
+        vv1 (assoc v1 :rate -1)]
+    (is (= (update-vocables [v1 v2 v3] [vv1 v3])
+           [vv1 v2 v3]))))
+
+
+(defn update-vocables
+  "Updates vocables in base with the changed ones in altered."
+  [base altered]
+  (let [reduce-vocable 
+          (fn [v]
+            {:left (:left v)
+             :right (:right v)})
+        vlist->set 
+          (fn [l]
+            [(reduce-vocable l) (:rate l)])
+        aset (into {} (map vlist->set altered))
+        bset (into {} (map  vlist->set base))
+        get-rate
+          (fn [key]
+            (if (contains? aset key)
+                (get aset key)
+                (get bset key)))]
+    (reduce (fn [l item]
+              (let [key (reduce-vocable item)]
+                (conj l
+                      (assoc key :rate (get-rate key)))))
+            []
+            base)))
