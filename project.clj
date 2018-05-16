@@ -5,4 +5,5 @@
   :dependencies [[org.clojure/clojure "1.8.0"]]
   :main ^:skip-aot vocabula.core
   :target-path "target/%s"
+  :test-paths ["src"]
   :profiles {:uberjar {:aot :all}})
