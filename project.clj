@@ -2,7 +2,8 @@
   :description "Simple command line vocabulary trainer"
   :url "https://github.com/pyohannes/vocabula"
   :license {:name "BSD 2-Clause License"}
-  :dependencies [[org.clojure/clojure "1.8.0"]]
+  :dependencies [[org.clojure/clojure "1.8.0"]
+                 [org.clojure/tools.cli "0.3.7"]]
   :main ^:skip-aot vocabula.core
   :target-path "target/%s"
   :test-paths ["src" "test"]
