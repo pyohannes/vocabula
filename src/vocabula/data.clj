@@ -5,7 +5,7 @@
 
 (declare word? word->string string->word
          vocable? vocable->string string->vocable
-         worst update-vocables)
+         worst update-vocables filter-vocables)
 
 
 (deftest word?-test
@@ -225,4 +225,43 @@
               []
               base)
       new-vocables)))
-      
+     
+
+(deftest filter-vocables-test
+  (let [v1 (string->vocable "a <> b")
+        v2 (string->vocable "c <1> d")
+        v3 (string->vocable "e <4> f")
+        v4 (string->vocable "g <-3> h")]
+    (testing "Order by worst vocables"
+      (is (= (filter-vocables [v1 v2 v3 v4] {:worst true})
+             [v4 v1 v2 v3])))
+    (testing "Limit"
+      (is (= (filter-vocables [v1 v2 v3 v4] {:limit 2})
+             [v1 v2])))
+    (testing "Limit and worst"
+      (is (= (filter-vocables [v1 v2 v3 v4] {:worst true, :limit 2})
+             [v4 v1])))))
+
+
+(defn filter-vocables
+  ""
+  [vs attrs]
+  (let [worst-apply 
+         (fn [vs]
+           (if (get attrs :worst)
+               (sort-by :rate vs)
+               vs))
+        limit-apply
+         (fn [vs]
+           (if (get attrs :limit)
+               (take (get attrs :limit) vs)
+               vs))
+        shuffle-apply
+         (fn [vs]
+           (if (get attrs :shuffle)
+               (shuffle vs)
+               vs))]
+    (-> vs
+        worst-apply
+        limit-apply
+        shuffle-apply)))

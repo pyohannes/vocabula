@@ -1,6 +1,7 @@
 (ns vocabula.vok_test
   (:require [clojure.test :refer :all]
             [vocabula.core :refer [vocabula-main]]
+            [vocabula.data :refer [filter-vocables]]
             [vocabula.persist.vok :refer [make-vok-reader make-vok-writer]]
             [vocabula.questioner.callback :refer [make-callback-ask]]))
 
@@ -75,3 +76,17 @@
                    (make-callback-ask cb))
     (is (= (slurp filename)
            "a <1> b\nc <1> d\ne <1> f\ng <1> h\n"))))
+
+
+(deftest cmd-vok-multiple-entry-filters
+  (let [filename (write-into-tempfile "a <3> b\nc <-4> d\ne <1> f\ng <> h\n")
+        cb (answer-correctly { "a" "b", "c" "d", "e" "f", "g" "h" })]
+    (vocabula-main (fn []
+                     (filter-vocables ((make-vok-reader filename))
+                                      {:shuffle true
+                                       :worst true
+                                       :limit 3}))
+                   (make-vok-writer filename)
+                   (make-callback-ask cb))
+    (is (= (slurp filename)
+           "a <3> b\nc <-3> d\ne <2> f\ng <1> h\n"))))
