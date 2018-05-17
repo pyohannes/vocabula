@@ -1,5 +1,6 @@
 (ns vocabula.core
   (:require [vocabula.question :refer :all]
+            [vocabula.questioner.text :refer [ask]]
             [vocabula.persist.vok :refer :all])
   (:gen-class))
 
@@ -13,6 +14,6 @@
 
 (defn -main
   [& args]
-  (vocabula-main (fn [] (read-vok (first args)))
-                 (fn [vs] (write-vok (first args) vs))
-                 vocabula.questioner.text/ask))
+  (vocabula-main (make-vok-reader (first args))
+                 (make-vok-writer (first args))
+                 ask))
