@@ -1,13 +1,18 @@
 (ns vocabula.core
-  (:require [vocabula.questioner.text :refer :all]
-            [vocabula.question :refer :all]
+  (:require [vocabula.question :refer :all]
             [vocabula.persist.vok :refer :all])
   (:gen-class))
 
+
+(defn vocabula-main
+  [retrieve store ask]
+  (let [vs (retrieve)]
+    (store (map (comp question->vocable ask vocable->question)
+                vs))))
+
+
 (defn -main
   [& args]
-  (let [filename (first args)
-        vs (read-vok filename)]
-    (write-vok filename
-               (map (comp question->vocable ask vocable->question)
-                    vs))))
+  (vocabula-main (fn [] (read-vok (first args)))
+                 (fn [vs] (write-vok (first args) vs))
+                 vocabula.questioner.text/ask))
