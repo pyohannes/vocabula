@@ -65,3 +65,13 @@
                    (make-callback-ask cb))
     (is (= (slurp filename1) "puella,ae <1> girl\n"))
     (is (= (slurp filename2) "puer,pueri <1> boy\n"))))
+
+
+(deftest cmd-vok-multiple-entry-ordered-rewrite
+  (let [filename (write-into-tempfile "a <> b\nc <> d\ne <> f\ng <> h\n")
+        cb (answer-correctly { "a" "b", "c" "d", "e" "f", "g" "h" })]
+    (vocabula-main (make-vok-reader filename)
+                   (make-vok-writer filename)
+                   (make-callback-ask cb))
+    (is (= (slurp filename)
+           "a <1> b\nc <1> d\ne <1> f\ng <1> h\n"))))

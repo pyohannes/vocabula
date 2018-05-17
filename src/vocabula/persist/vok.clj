@@ -100,22 +100,31 @@
         filename (.getAbsolutePath tempfile)
         vwrite (make-vok-writer filename)]
     (.deleteOnExit tempfile)
-    (vwrite [{:unit filename
-              :rate  0
-              :left  [{:text "puella,ae"}]
-              :right [{:text "girl"}]}])
-    (is (= (slurp filename)
-           "puella,ae <> girl\n"))
-    (vwrite [{:unit filename
-              :rate  0
-              :left  [{:text "puella,ae" :desc "f"}]
-              :right [{:text "girl"}]}
-             {:unit filename
-              :rate 4
-              :left  [{:text "bellus,a,um"}]
-              :right [{:text "pretty"} {:text "beautiful"}]}])
-    (is (= (slurp filename)
-           "puella,ae (f) <> girl\nbellus,a,um <4> pretty | beautiful\n"))
+    (testing "Single entry vok file"
+      (vwrite [{:unit filename
+                :rate  0
+                :left  [{:text "puella,ae"}]
+                :right [{:text "girl"}]}])
+      (is (= (slurp filename)
+             "puella,ae <> girl\n")))
+    (testing "Two entry vok file"
+      (spit filename "")
+      (vwrite [{:unit filename
+                :rate  0
+                :left  [{:text "puella,ae" :desc "f"}]
+                :right [{:text "girl"}]}
+               {:unit filename
+                :rate 4
+                :left  [{:text "bellus,a,um"}]
+                :right [{:text "pretty"} {:text "beautiful"}]}])
+      (is (= (slurp filename)
+             "puella,ae (f) <> girl\nbellus,a,um <4> pretty | beautiful\n")))
+    (testing "Order preserved in vok file"
+      (let [content "a <> b\nc <> d\ne <> f\ng <> h\n"
+            vread (make-vok-reader filename)]
+        (spit filename content)
+        (vwrite (shuffle (vread)))
+        (is (= (slurp filename) content))))
   ))
 
 (defn make-vok-writer
@@ -131,10 +140,11 @@
   "Write vocabula entries into a vok file. filename is the path to the vok file 
   to be written. vocables is a list of vocables."
   [filename vocables]
-  (with-open [wrt (clojure.java.io/writer filename)]
-    (doseq [v vocables]
-      (.write wrt (vocabula.data/vocable->string v))
-      (.write wrt "\n")))
+  (let [vocables (update-vocables (read-vok filename) vocables)]
+    (with-open [wrt (clojure.java.io/writer filename)]
+      (doseq [v vocables]
+        (.write wrt (vocabula.data/vocable->string v))
+        (.write wrt "\n"))))
   )
 
 

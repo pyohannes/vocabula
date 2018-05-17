@@ -183,13 +183,20 @@
 
 
 (deftest merge-vocables-test
-  (let [v1 (string->vocable "puella,ae <4> girl")
-        v2 (string->vocable "magnus,a,um <-3> great")
-        v3 (string->vocable "hodie <0> today")
-        vv1 (assoc v1 :rate -1)]
-    (is (= (update-vocables [v1 v2 v3] [vv1 v3])
-           [vv1 v2 v3]))))
-
+  (testing "Simple updates"
+    (let [v1 (string->vocable "puella,ae <4> girl")
+          v2 (string->vocable "magnus,a,um <-3> great")
+          v3 (string->vocable "hodie <0> today")
+          vv1 (assoc v1 :rate -1)]
+      (is (= (update-vocables [v1 v2 v3] [vv1 v3])
+             [vv1 v2 v3]))))
+  (testing "Append new vocables"
+    (let [v1 (string->vocable "puella,ae <4> girl")
+          v2 (string->vocable "magnus,a,um <-3> great")
+          v3 (string->vocable "hodie <0> today")]
+      (is (= (update-vocables [v1 v2] [v2 v3])
+             [v1 v2 v3])))))
+  
 
 (defn update-vocables
   "Updates vocables in base with the changed ones in altered."
@@ -207,10 +214,15 @@
           (fn [key]
             (if (contains? aset key)
                 (get aset key)
-                (get bset key)))]
-    (reduce (fn [l item]
-              (let [key (reduce-vocable item)]
-                (conj l
-                      (assoc key :rate (get-rate key)))))
-            []
-            base)))
+                (get bset key)))
+        new-vocables (filter #(not (contains? bset (reduce-vocable %))) 
+                             altered)]
+    (into
+      (reduce (fn [l item]
+                (let [key (reduce-vocable item)]
+                  (conj l
+                        (assoc key :rate (get-rate key)))))
+              []
+              base)
+      new-vocables)))
+      
