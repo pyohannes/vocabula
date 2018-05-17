@@ -53,3 +53,15 @@
                    (make-callback-ask cb))
     (is (= (slurp filename)
            "puella,ae <1> girl\npuer,pueri <1> boy\n"))))
+
+
+(deftest cmd-vok-multiple-files
+  (let [filename1 (write-into-tempfile "puella,ae <> girl\n")
+        filename2 (write-into-tempfile "puer,pueri <> boy\n")
+        cb (answer-correctly { "puella,ae" "girl"
+                               "puer,pueri" "boy" })]
+    (vocabula-main (make-vok-reader filename1 filename2)
+                   (make-vok-writer filename1 filename2)
+                   (make-callback-ask cb))
+    (is (= (slurp filename1) "puella,ae <1> girl\n"))
+    (is (= (slurp filename2) "puer,pueri <1> boy\n"))))
