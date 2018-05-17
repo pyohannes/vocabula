@@ -39,4 +39,11 @@ jobs:
           key: v1-dependencies-{{ checksum "project.clj" }}
         
       # run tests!
-      - run: lein test
+      - run: lein cloverage
+
+      - store_test_results:
+          path: target/test-reports
+
+      - store_artifacts:
+          path: target/coverage
+          destination: coverage 
