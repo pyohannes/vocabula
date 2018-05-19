@@ -12,8 +12,7 @@
   [["-s" "--no-shuffle" "Do not shuffle vocables"
     :id :shuffle
     :default true]
-   ["-l" "--limit" "Limit vocables to be asked"
-    :id :limit
+   ["-l" "--limit LIMIT" "Limit vocables to be asked"
     :default 20
     :parse-fn #(Integer/parseInt %)]
    ["-w" "--worst" "Only ask worst vocables"
