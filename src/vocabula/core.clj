@@ -36,7 +36,7 @@
 
 (defn vocabula-main
   [retrieve store ask]
-  (let [vs (shuffle (retrieve))]
+  (let [vs (retrieve)]
     (store (map (comp question->vocable ask vocable->question)
                 vs))))
 

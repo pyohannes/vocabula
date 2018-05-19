@@ -262,6 +262,7 @@
                (shuffle vs)
                vs))]
     (-> vs
+        shuffle-apply
         worst-apply
         limit-apply
         shuffle-apply)))
